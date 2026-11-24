@@ -6,6 +6,10 @@
   const moreButton = document.querySelector('.more-fields');
   const extraFields = document.querySelector('#extra-fields');
   const endpoint = window.GESTIA_CONFIG?.leadEndpoint?.trim() || '';
+  if (!endpoint) {
+    form.querySelector('.submit-button').firstChild.textContent = 'Отправить тестовую заявку ';
+    document.querySelector('#form-hint').textContent = 'Демо-режим: форма покажет подтверждение. Заявка не уйдёт в клининговую компанию.';
+  }
   if (endpoint) {
     form.querySelector('.submit-button').firstChild.textContent = 'Отправить заявку ';
     document.querySelector('#form-hint').textContent = 'После отправки мы передадим заявку компании для ответа. Срок ответа зависит от работы сервиса.';
@@ -43,7 +47,7 @@
     result.hidden = false;
     result.classList.toggle('error', isError);
     result.replaceChildren(...content);
-    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
   };
 
   const node = (tag, text, className) => {
@@ -122,6 +126,12 @@
       try { await navigator.clipboard.writeText(text); copy.textContent = 'Скопировано ✓'; }
       catch { copy.textContent = 'Выделите и скопируйте текст выше'; }
     });
-    showResult([node('strong', 'Заявка подготовлена'), node('p', 'Сейчас сайт работает в демо-режиме: данные не отправлены. Скопируйте текст для связи с компанией.'), node('pre', text), copy]);
+    const reference = crypto.randomUUID().slice(0, 8).toUpperCase();
+    showResult([
+      node('strong', `Тестовая заявка №${reference} принята`),
+      node('p', 'Это подтверждение демо-версии. Данные не отправлены клининговой компании.'),
+      node('pre', text), copy,
+    ]);
+    form.reset();
   });
 })();
